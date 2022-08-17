@@ -13,3 +13,6 @@ class UserRegisterResponse(BaseSchema):
     id:int
     username:str
     email:Optional[EmailStr]
+
+class ULoginResponse(BaseSchema):
+    session_id:str
