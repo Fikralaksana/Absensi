@@ -5,7 +5,10 @@ class UserRegisterRequest(BaseModel):
     username:str
     email:Optional[EmailStr]
     password:str
-    
+
 class LoginRequest(BaseModel):
     username:str
     password:str
+
+class CheckinRequest(BaseModel):
+    pass

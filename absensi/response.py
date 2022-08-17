@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel,EmailStr
 from typing import Optional,Union
 class BaseResponse(BaseModel):
@@ -14,5 +15,8 @@ class UserRegisterResponse(BaseSchema):
     username:str
     email:Optional[EmailStr]
 
-class ULoginResponse(BaseSchema):
-    session_id:str
+class CheckinResponse(BaseSchema):
+    user_id:str
+    username:str
+    check_in:datetime
+    check_out:Optional[datetime]
