@@ -38,6 +38,11 @@ def aquery_error(e:EmptyQuery):
 def resource_not_found(e):
     response=Base(status="error",msg=str(e))
     return jsonify(response.dict()), 400
+
+@bp.app_errorhandler(Exception)
+def resource_not_found(e):
+    response=Base(status="error",msg="Sistem sedang dalam pemeliharaan")
+    return jsonify(response.dict()), 500
     
 def hash_password(inp):
     salt = "5gz"

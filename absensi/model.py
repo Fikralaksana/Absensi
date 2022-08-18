@@ -4,7 +4,7 @@ import sqlalchemy as db
 from sqlalchemy import select,update,delete,and_
 from sqlalchemy.orm import declarative_base,relationship
 from sqlalchemy.orm import Session as DB_Session
-from .errors import LoginFailed
+from .errors import EmptyQuery, LoginFailed
 from flask.sessions import SessionMixin
 from werkzeug.security import check_password_hash
 from typing import TypeVar,Union
@@ -16,6 +16,8 @@ class BaseModel(object):
     @classmethod
     def get(cls,db_session:DB_Session,id:str,*args, **kwargs)->BaseModelType:
         result=db_session.execute(select(cls).filter(cls.id==id)).first()
+        if not result:
+            raise EmptyQuery("Record tidak ditemukan")
         return result[0] if result else None
     @classmethod
     def get_all(cls,db_session:DB_Session,id:str,*args, **kwargs)->BaseModelType:
