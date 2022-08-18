@@ -10,5 +10,9 @@ class LoginRequest(BaseModel):
     username:str
     password:str
 
-class CheckinRequest(BaseModel):
+class CreateActivityRequest(BaseModel):
+    name:str
+    description:Optional[str]
+
+class UpdateActivityRequest(CreateActivityRequest):
     pass

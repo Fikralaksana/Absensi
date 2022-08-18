@@ -1,10 +1,11 @@
+from datetime import datetime
 from flask import jsonify,session,g
 from pydantic.error_wrappers import ValidationError
 from flask import Blueprint,current_app
-from .response import BaseResponse
+from .response import Base
 from .errors import LoginFailed,AuthFailed,EmptyQuery
 from sqlalchemy.orm import Session
-from .model import User
+from .model import User,Absensi
 import hashlib,functools
 
 bp = Blueprint('services', __name__)
@@ -15,27 +16,27 @@ def validation_error(e:ValidationError):
     for i in e.errors():
         resp[i['loc'][0]]=i['msg']
 
-    response=BaseResponse(status="error",msg=resp)
+    response=Base(status="error",msg=resp)
     return jsonify(response.dict()), 400
 
 @bp.app_errorhandler(LoginFailed)
 def login_error(e:LoginFailed):
-    response=BaseResponse(status="error",msg=str(e))
+    response=Base(status="error",msg=str(e))
     return jsonify(response.dict()), 400
 
 @bp.app_errorhandler(AuthFailed)
 def auth_error(e:AuthFailed):
-    response=BaseResponse(status="error",msg=str(e))
+    response=Base(status="error",msg=str(e))
     return jsonify(response.dict()), 400
 
 @bp.app_errorhandler(EmptyQuery)
 def aquery_error(e:EmptyQuery):
-    response=BaseResponse(status="error",msg=str(e))
+    response=Base(status="error",msg=str(e))
     return jsonify(response.dict()), 400
 
 @bp.app_errorhandler(400)
 def resource_not_found(e):
-    response=BaseResponse(status="error",msg=str(e))
+    response=Base(status="error",msg=str(e))
     return jsonify(response.dict()), 400
     
 def hash_password(inp):
@@ -59,6 +60,20 @@ def login_required(view):
     def wrapped_view(**kwargs):
         if g.user is None:
             raise AuthFailed("Session Kadaluarsa")
+        return view(**kwargs)
+
+    return wrapped_view
+
+def between_checkin_checkout(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        with Session(current_app.config['engine']) as db_session:
+            absen=Absensi.get_by_check_in(db_session,g.user.id,datetime.now().date())
+            if not absen:
+                raise EmptyQuery("Anda belum check in")
+            if absen.check_out != None:
+                raise EmptyQuery("Anda sudah check out")
+
         return view(**kwargs)
 
     return wrapped_view
