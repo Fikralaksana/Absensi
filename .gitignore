@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 
 #alembic
-*alembic/versions/*
+alembic/versions/*
+!alembic/versions/.gitkeep 
 
 flaskr.sqlite
