@@ -21,15 +21,19 @@ def hello():
 
 @bp.post('/api/register')
 def register():
-    with Session(current_app.config['engine']) as db_session:
-        user=UserRegisterRequest(**(request.json))
-        user.password=generate_password_hash(user.password)
-        user=User(**(user.dict()))
-        db_session.add(user)
-        db_session.commit()
-        user.id
-        response=UserRegisterResponse(**(user.__dict__)).get()
-    return jsonify(response)
+        with Session(current_app.config['engine']) as db_session:
+            try:
+                user=UserRegisterRequest(**(request.json))
+                user.password=generate_password_hash(user.password)
+                user=User(**(user.dict()))
+                db_session.add(user)
+                db_session.commit()
+                user.id
+                response=UserRegisterResponse(**(user.__dict__)).get()
+            except Exception as e:
+                if 'UNIQUE' in e.args[0]:
+                    raise EmptyQuery("User dengan credential tersebut sudah ada")
+        return jsonify(response)
 
 @bp.post('/api/login')
 def login():
